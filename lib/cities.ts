@@ -79,8 +79,15 @@ export async function resolveCity(
 
   if (!geo) return null;
 
+  // ✅ FIX: ensure required numeric fields exist before assigning City type
+  if (geo.lat == null || geo.lng == null) {
+    return null;
+  }
+
   const city: City = {
     ...geo,
+    lat: geo.lat,
+    lng: geo.lng,
     slug: generateCitySlug(geo),
   };
 
