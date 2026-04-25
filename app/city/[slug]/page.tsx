@@ -101,7 +101,7 @@ export default async function CityPage({
 
       {/* LEFT ADS (MATCH HOME) */}
       <aside className="w-[52px] md:w-[120px] bg-black/30 border-r border-blue-500/10 flex flex-col gap-4 items-center py-4">
-        {[1,2,3,4].map(i => (
+        {[1,2,3,4,5,6,7,8,9].map(i => (
           <div
             key={i}
             className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400"
@@ -185,7 +185,7 @@ export default async function CityPage({
 
       {/* RIGHT ADS (MATCH HOME) */}
       <aside className="w-[52px] md:w-[120px] bg-black/30 border-l border-blue-500/10 flex flex-col gap-4 items-center py-4">
-        {[1,2,3,4].map(i => (
+        {[1,2,3,4,5,6,7,8,9].map(i => (
           <div
             key={i}
             className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400"
