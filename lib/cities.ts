@@ -14,14 +14,17 @@ type City = {
 
 /**
  * Geocoding API (free, no key required)
- * You can swap later if you want higher accuracy
  */
 async function geocodeCity(query: string) {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
     query
   )}&count=1&language=en&format=json`;
 
-  const data = await cachedFetch<any>(`geo:${query}`, url, 1000 * 60 * 60 * 24);
+  const data = await cachedFetch<any>(
+    `geo:${query}`,
+    url,
+    1000 * 60 * 60 * 24
+  );
 
   if (!data?.results?.length) return null;
 
@@ -29,7 +32,18 @@ async function geocodeCity(query: string) {
 
   if (!isValidCityResult(result)) return null;
 
-  return normalizeCity(result);
+  const normalized = normalizeCity(result);
+
+  // ✅ HARD SAFETY: enforce numeric lat/lng
+  if (normalized.lat == null || normalized.lng == null) {
+    return null;
+  }
+
+  return {
+    ...normalized,
+    lat: Number(normalized.lat),
+    lng: Number(normalized.lng),
+  };
 }
 
 /**
@@ -47,10 +61,6 @@ export function findLocalCity(query: string, allCities: City[]) {
 
 /**
  * MAIN ENTRY POINT
- * - search city
- * - check local JSON
- * - fallback to geocoding
- * - return normalized SEO-ready city
  */
 export async function resolveCity(
   query: string,
@@ -61,12 +71,14 @@ export async function resolveCity(
   const cached = cache.get<City>(`city:${query}`);
   if (cached) return cached;
 
-  // 1. try local dataset first
+  // 1. local dataset
   const local = findLocalCity(query, allCities);
 
   if (local) {
-    const enriched = {
+    const enriched: City = {
       ...local,
+      lat: Number(local.lat),
+      lng: Number(local.lng),
       slug: generateCitySlug(local),
     };
 
@@ -74,20 +86,18 @@ export async function resolveCity(
     return enriched;
   }
 
-  // 2. fallback to geocoding API
+  // 2. fallback API
   const geo = await geocodeCity(query);
 
   if (!geo) return null;
 
-  // ✅ FIX: ensure required numeric fields exist before assigning City type
-  if (geo.lat == null || geo.lng == null) {
-    return null;
-  }
-
   const city: City = {
-    ...geo,
-    lat: geo.lat,
-    lng: geo.lng,
+    name: geo.name,
+    country: geo.country,
+    state: geo.state,
+    timezone: geo.timezone,
+    lat: Number(geo.lat),
+    lng: Number(geo.lng),
     slug: generateCitySlug(geo),
   };
 
@@ -97,11 +107,13 @@ export async function resolveCity(
 }
 
 /**
- * OPTIONAL: batch enrichment (for SEO pre-generation later)
+ * OPTIONAL: batch enrichment (SEO)
  */
 export async function enrichCities(list: City[]) {
   return list.map((city) => ({
     ...city,
+    lat: Number(city.lat),
+    lng: Number(city.lng),
     slug: generateCitySlug(city),
   }));
 }

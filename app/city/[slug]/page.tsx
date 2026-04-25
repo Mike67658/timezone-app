@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import { notFound } from "next/navigation";
-
 import { generateCitySlug } from "@/lib/slugs";
 
 const DATA_PATH = path.join(process.cwd(), "public/cities_search_final.json");
@@ -19,7 +18,13 @@ type City = {
 function getCities(): City[] {
   try {
     const raw = fs.readFileSync(DATA_PATH, "utf-8");
-    return JSON.parse(raw);
+    const data = JSON.parse(raw);
+
+    return data.map((c: any) => ({
+      ...c,
+      lat: Number(c.lat),
+      lng: Number(c.lng),
+    }));
   } catch {
     return [];
   }
@@ -37,7 +42,7 @@ async function getWeather(lat: number, lng: number) {
     );
 
     const data = await res.json();
-    return data.current_weather;
+    return data?.current_weather ?? null;
   } catch {
     return null;
   }
@@ -58,9 +63,6 @@ function toF(c: number) {
   return Math.round((c * 9) / 5 + 32);
 }
 
-/**
- * ✅ FIX: params is now a Promise in Next.js 16+
- */
 export default async function CityPage({
   params,
 }: {
@@ -83,7 +85,7 @@ export default async function CityPage({
         hour: "numeric",
         minute: "2-digit",
       })
-    : "";
+    : "—";
 
   const date = city.timezone
     ? now.toLocaleDateString("en-US", {
@@ -92,58 +94,106 @@ export default async function CityPage({
         month: "short",
         day: "numeric",
       })
-    : "";
+    : "—";
 
   return (
-    <div className="min-h-screen bg-[#050814] text-white px-6 py-10">
+    <div className="min-h-screen bg-[#050814] text-white flex">
 
-      <div className="max-w-3xl mx-auto">
+      {/* LEFT ADS (MATCH HOME) */}
+      <aside className="w-[52px] md:w-[120px] bg-black/30 border-r border-blue-500/10 flex flex-col gap-4 items-center py-4">
+        {[1,2,3,4].map(i => (
+          <div
+            key={i}
+            className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400"
+          >
+            Ad
+          </div>
+        ))}
+      </aside>
 
-        <h1 className="text-4xl font-bold">
-          🌍 {city.name}
-        </h1>
+      {/* MAIN (MATCH HOME STRUCTURE) */}
+      <main className="flex-1 px-4 py-6 space-y-6">
 
-        <p className="text-gray-400 mt-1">
-          {city.country} {city.state ? `• ${city.state}` : ""}
-        </p>
+        {/* CITY PANEL (styled like selectedCity block) */}
+        <div className="p-6 bg-black/40 border border-cyan-500/20 rounded-xl">
 
-        <div className="text-5xl font-mono text-cyan-300 mt-6">
-          {time}
-        </div>
+          <div className="text-3xl font-bold">
+            🌍 {city.name}
+          </div>
 
-        <div className="text-sm text-gray-400 mt-1">
-          {date}
-        </div>
+          <div className="text-5xl font-mono text-cyan-300 mt-2">
+            {time}
+          </div>
 
-        {weather && (
-          <div className="mt-6 p-4 rounded-xl bg-black/40 border border-blue-500/20">
-            <div className="text-xl">
-              {Math.round(weather.temperature)}°C / {toF(weather.temperature)}°F
-            </div>
+          <div className="text-sm text-gray-400">
+            {date}
+          </div>
 
-            <div className="text-gray-300">
+          {weather && (
+            <div className="mt-3 text-gray-300">
+              {Math.round(weather.temperature)}°C / {toF(weather.temperature)}°F •{" "}
               {weatherCodeToText(weather.weathercode)}
             </div>
+          )}
+
+          <div className="text-xs text-gray-500 mt-2">
+            LAT-{city.lat.toFixed(2)} LONG-{city.lng.toFixed(2)}
           </div>
-        )}
 
-        <div className="mt-6 text-sm text-gray-500">
-          LAT-{city.lat.toFixed(2)} LONG-{city.lng.toFixed(2)}
         </div>
 
-        {/* SEO TEXT */}
-        <div className="mt-10 text-gray-300 leading-relaxed">
-          <p>
-            Current local time in {city.name}, {city.country} is shown above.
-            This page provides live time, weather conditions, and geographic data.
-          </p>
-
-          <p className="mt-4">
-            Explore timezone tracking and live global city data.
-          </p>
+        {/* MINI SEARCH (like homepage input) */}
+        <div className="text-sm text-gray-500">
+          Use search on homepage to switch cities
         </div>
 
-      </div>
+        {/* FEATURED BLOCK (same layout as home) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {cities.slice(0, 9).map((c, i) => {
+            const t = new Date().toLocaleTimeString("en-US", {
+              timeZone: c.timezone,
+              hour: "numeric",
+              minute: "2-digit",
+            });
+
+            return (
+              <div
+                key={i}
+                className="p-5 bg-black/30 border border-blue-500/10 rounded-xl"
+              >
+                <div>{c.name}</div>
+
+                <div className="text-xl font-mono text-cyan-300">
+                  {t}
+                </div>
+
+                <div className="text-xs text-gray-400">
+                  {c.country} {c.state}
+                </div>
+
+                <div className="text-xs text-gray-500 mt-1">
+                  LAT-{c.lat.toFixed(2)} LONG-{c.lng.toFixed(2)}
+                </div>
+              </div>
+            );
+          })}
+
+        </div>
+
+      </main>
+
+      {/* RIGHT ADS (MATCH HOME) */}
+      <aside className="w-[52px] md:w-[120px] bg-black/30 border-l border-blue-500/10 flex flex-col gap-4 items-center py-4">
+        {[1,2,3,4].map(i => (
+          <div
+            key={i}
+            className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400"
+          >
+            Ad
+          </div>
+        ))}
+      </aside>
 
     </div>
   );
