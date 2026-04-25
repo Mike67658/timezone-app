@@ -1,4 +1,8 @@
-import { isValidSearchQuery, isValidCityResult, normalizeCity } from "./filters";
+import {
+  isValidSearchQuery,
+  isValidCityResult,
+  normalizeCity,
+} from "./filters";
 import { cache, cachedFetch } from "./cache";
 import { generateCitySlug } from "./slugs";
 
@@ -13,9 +17,9 @@ type City = {
 };
 
 /**
- * Geocoding API (free, no key required)
+ * Geocoding API (NO timezone exists here)
  */
-async function geocodeCity(query: string) {
+async function geocodeCity(query: string): Promise<City | null> {
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
     query
   )}&count=1&language=en&format=json`;
@@ -34,20 +38,27 @@ async function geocodeCity(query: string) {
 
   const normalized = normalizeCity(result);
 
-  // ✅ HARD SAFETY: enforce numeric lat/lng
-  if (normalized.lat == null || normalized.lng == null) {
-    return null;
-  }
+  const lat = Number(normalized.lat ?? result.latitude);
+  const lng = Number(normalized.lng ?? result.longitude);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
 
   return {
-    ...normalized,
-    lat: Number(normalized.lat),
-    lng: Number(normalized.lng),
+    name: normalized.name,
+    country: normalized.country,
+    state: normalized.state,
+
+    // 🔥 FIX: NEVER use geo.timezone (doesn't exist)
+    timezone: "UTC",
+
+    lat,
+    lng,
+    slug: generateCitySlug(normalized),
   };
 }
 
 /**
- * Try local dataset first (FAST PATH)
+ * Local dataset search (FAST)
  */
 export function findLocalCity(query: string, allCities: City[]) {
   const lower = query.toLowerCase().trim();
@@ -60,7 +71,7 @@ export function findLocalCity(query: string, allCities: City[]) {
 }
 
 /**
- * MAIN ENTRY POINT
+ * MAIN RESOLVER
  */
 export async function resolveCity(
   query: string,
@@ -71,14 +82,20 @@ export async function resolveCity(
   const cached = cache.get<City>(`city:${query}`);
   if (cached) return cached;
 
-  // 1. local dataset
+  // 1. LOCAL FIRST
   const local = findLocalCity(query, allCities);
 
   if (local) {
+    const lat = Number(local.lat);
+    const lng = Number(local.lng);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
     const enriched: City = {
       ...local,
-      lat: Number(local.lat),
-      lng: Number(local.lng),
+      lat,
+      lng,
+      timezone: local.timezone ?? "UTC",
       slug: generateCitySlug(local),
     };
 
@@ -86,18 +103,20 @@ export async function resolveCity(
     return enriched;
   }
 
-  // 2. fallback API
+  // 2. FALLBACK API
   const geo = await geocodeCity(query);
-
   if (!geo) return null;
 
   const city: City = {
     name: geo.name,
     country: geo.country,
     state: geo.state,
-    timezone: geo.timezone,
-    lat: Number(geo.lat),
-    lng: Number(geo.lng),
+    lat: geo.lat,
+    lng: geo.lng,
+
+    // 🔥 STILL NO timezone from API
+    timezone: "UTC",
+
     slug: generateCitySlug(geo),
   };
 
@@ -107,13 +126,14 @@ export async function resolveCity(
 }
 
 /**
- * OPTIONAL: batch enrichment (SEO)
+ * OPTIONAL: SEO batch
  */
 export async function enrichCities(list: City[]) {
   return list.map((city) => ({
     ...city,
     lat: Number(city.lat),
     lng: Number(city.lng),
+    timezone: city.timezone ?? "UTC",
     slug: generateCitySlug(city),
   }));
 }
