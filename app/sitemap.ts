@@ -1,26 +1,33 @@
-export default function sitemapIndex() {
-  const totalChunks = 5; // you can increase later
+export default function sitemap() {
+  const now = new Date().toISOString();
 
-  return [
-    {
-      url: "https://timebycity.net/sitemap/cities-0.xml",
-      lastModified: new Date(),
-    },
-    {
-      url: "https://timebycity.net/sitemap/cities-1.xml",
-      lastModified: new Date(),
-    },
-    {
-      url: "https://timebycity.net/sitemap/cities-2.xml",
-      lastModified: new Date(),
-    },
-    {
-      url: "https://timebycity.net/sitemap/cities-3.xml",
-      lastModified: new Date(),
-    },
-    {
-      url: "https://timebycity.net/sitemap/cities-4.xml",
-      lastModified: new Date(),
-    },
-  ];
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <sitemap>
+    <loc>https://timebycity.net/sitemap/cities-0.xml</loc>
+    <lastmod>${now}</lastmod>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://timebycity.net/sitemap/cities-1.xml</loc>
+    <lastmod>${now}</lastmod>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://timebycity.net/sitemap/cities-2.xml</loc>
+    <lastmod>${now}</lastmod>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://timebycity.net/sitemap/cities-3.xml</loc>
+    <lastmod>${now}</lastmod>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://timebycity.net/sitemap/cities-4.xml</loc>
+    <lastmod>${now}</lastmod>
+  </sitemap>
+
+</sitemapindex>`;
 }
