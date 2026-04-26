@@ -47,14 +47,14 @@ export default function Home() {
   const fuseRef = useRef<any>(null);
   const debounceRef = useRef<any>(null);
 
-  // LOAD DATA
+  // LOAD DATA (LOCAL ONLY)
   useEffect(() => {
     const load = async () => {
       const data = await fetch("/cities_search_final.json").then(r => r.json());
       setAllCities(data);
 
       fuseRef.current = new Fuse(data, {
-        keys: ["name", "country", "state"],
+        keys: ["name", "country", "state", "search"],
         threshold: 0.25,
       });
 
@@ -100,7 +100,7 @@ export default function Home() {
     return () => clearInterval(i);
   }, []);
 
-  // SEARCH + API FALLBACK
+  // SEARCH (LOCAL ONLY - NO API)
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
     setSearchQuery(v);
@@ -112,7 +112,7 @@ export default function Home() {
       return;
     }
 
-    debounceRef.current = setTimeout(async () => {
+    debounceRef.current = setTimeout(() => {
       if (!fuseRef.current) return;
 
       const localResults = fuseRef.current
@@ -120,28 +120,7 @@ export default function Home() {
         .slice(0, 8)
         .map((r: any) => r.item);
 
-      if (localResults.length > 0) {
-        setResults(localResults);
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/discover-city", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: v }),
-        });
-
-        const data = await res.json();
-
-        if (data?.city) {
-          setResults([data.city]);
-        } else {
-          setResults([]);
-        }
-      } catch {
-        setResults([]);
-      }
+      setResults(localResults);
     }, 70);
   };
 
@@ -163,7 +142,7 @@ export default function Home() {
       const out: any = {};
 
       const zones = [
-        ...INITIAL_FEATURED_CITIES.map((c) => c.timezone),
+        ...INITIAL_FEATURED_CITIES.map(c => c.timezone),
         ...(selectedCity ? [selectedCity.timezone] : []),
       ];
 
@@ -199,10 +178,7 @@ export default function Home() {
       {/* LEFT ADS */}
       <aside className="w-[52px] md:w-[120px] bg-black/30 border-r border-blue-500/10 flex flex-col gap-4 items-center py-4">
         {[1,2,3,4,5,6,7,8,9].map(i => (
-          <div
-            key={i}
-            className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400"
-          >
+          <div key={i} className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400">
             Ad
           </div>
         ))}
@@ -268,10 +244,7 @@ export default function Home() {
             const w = weatherMap[c.name];
 
             return (
-              <div
-                key={i}
-                className="p-5 bg-black/30 border border-blue-500/10 rounded-xl"
-              >
+              <div key={i} className="p-5 bg-black/30 border border-blue-500/10 rounded-xl">
                 <div>{c.emoji} {c.name}</div>
 
                 <div className="text-xl font-mono text-cyan-300">
@@ -301,10 +274,7 @@ export default function Home() {
       {/* RIGHT ADS */}
       <aside className="w-[52px] md:w-[120px] bg-black/30 border-l border-blue-500/10 flex flex-col gap-4 items-center py-4">
         {[1,2,3,4,5,6,7,8,9].map(i => (
-          <div
-            key={i}
-            className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400"
-          >
+          <div key={i} className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400">
             Ad
           </div>
         ))}
