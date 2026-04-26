@@ -117,21 +117,19 @@ export default async function CityPage({
         {/* CITY PANEL */}
         <div className="p-6 bg-black/40 border border-cyan-400/30 rounded-xl shadow-[0_0_25px_rgba(34,211,238,0.15)]">
 
-          {/* HEADER ROW */}
-          <div className="flex items-center justify-between gap-4">
-
-            <div className="text-3xl font-bold text-cyan-200">
-              🌍 {city.name}
-            </div>
-
-            {/* 🔥 NEW SEARCH BUTTON */}
+          {/* 🔥 TOP UTILITY BAR */}
+          <div className="flex justify-end mb-4">
             <a
               href="/"
               className="px-4 py-2 rounded-lg bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition shadow-md"
             >
               🔍 New Search
             </a>
+          </div>
 
+          {/* CITY NAME */}
+          <div className="text-3xl font-bold text-cyan-200">
+            🌍 {city.name}
           </div>
 
           {/* TIME */}
