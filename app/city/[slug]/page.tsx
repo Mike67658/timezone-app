@@ -181,12 +181,14 @@ export default async function CityPage({
 
         </div>
 
-        {/* 🔥 FOOTER (ADDED ONLY) */}
-        <div className="pt-10 text-center space-y-4 text-cyan-200">
+        {/* 🔥 FOOTER */}
+        <div className="pt-14 text-center space-y-4 text-cyan-200">
 
-          <div className="text-lg">What time is it in {city.name}?</div>
+          <div className="text-lg text-cyan-300">
+            What time is it in {city.name}?
+          </div>
 
-          <div className="text-2xl font-bold text-cyan-300 mt-4">
+          <div className="text-2xl font-bold text-cyan-200 mt-4">
             We have the answer.
           </div>
 
@@ -195,6 +197,14 @@ export default async function CityPage({
             <div>Accurate timezone + weather data</div>
             <div>No login required</div>
             <div>Updated continuously</div>
+          </div>
+
+          {/* NAV TABS ADDED */}
+          <div className="flex justify-center gap-6 text-sm text-cyan-300 mt-6">
+            <a href="/about" className="hover:text-cyan-100">About</a>
+            <a href="/privacy" className="hover:text-cyan-100">Privacy</a>
+            <a href="/terms" className="hover:text-cyan-100">Terms</a>
+            <a href="/contact" className="hover:text-cyan-100">Contact</a>
           </div>
 
           <div className="text-cyan-300 mt-6 text-xl font-semibold">

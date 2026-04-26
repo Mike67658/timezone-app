@@ -221,7 +221,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* ✅ RESTORED */}
             <div className="text-xs text-gray-500 mt-2">
               LAT-{selectedCity.lat?.toFixed(2)} LONG-{selectedCity.lng?.toFixed(2)}
             </div>
@@ -252,7 +251,6 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* ✅ RESTORED */}
                 <div className="text-xs text-gray-500 mt-1">
                   LAT-{c.lat.toFixed(2)} LONG-{c.lng.toFixed(2)}
                 </div>
@@ -262,20 +260,29 @@ export default function Home() {
           })}
         </div>
 
-        {/* FOOTER (UNCHANGED LOGIC) */}
-        <div className="pt-10 text-center space-y-4 text-cyan-200">
+        {/* FOOTER (WITH RESTORED TRUST + CREDIT SECTION) */}
+        <div className="pt-10 text-center border-t border-cyan-500/10 mt-10 space-y-4">
 
-          {INITIAL_FEATURED_CITIES.map((c) => (
-            <div key={c.name} className="text-lg">
-              What time is it in {c.name}?
-            </div>
-          ))}
+          <div className="text-cyan-300 font-semibold text-lg">
+            Explore
+          </div>
 
-          <div className="text-2xl font-bold text-cyan-300 mt-6">
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-cyan-200">
+            <button onClick={() => router.push("/about")}>About</button>
+            <button onClick={() => router.push("/privacy")}>Privacy</button>
+            <button onClick={() => router.push("/terms")}>Terms</button>
+            <button onClick={() => router.push("/contact")}>Contact</button>
+          </div>
+
+          <div className="text-lg text-cyan-200 mt-6">
+            What time is it in Manila? Tokyo? New York?
+          </div>
+
+          <div className="text-2xl font-bold text-cyan-300">
             We have the answer.
           </div>
 
-          <div className="text-sm text-gray-300 space-y-1 mt-4">
+          <div className="text-sm text-gray-300 space-y-1">
             <div>Search any city worldwide instantly</div>
             <div>Accurate timezone + weather data</div>
             <div>No login required</div>
@@ -286,12 +293,13 @@ export default function Home() {
             TimeByCity
           </div>
 
-          <div className="text-xs text-gray-500 mt-2">
-            Data: Open-Meteo Weather API • Time zones: IANA standard
+          {/* RESTORED CREDITS */}
+          <div className="text-xs text-gray-500 mt-3">
+            Data source: Open-Meteo Weather API • Time zones: IANA database
           </div>
 
-          <div className="text-[10px] text-gray-600 mt-4">
-            This site is for informational purposes only. Weather data may vary slightly from local sources.
+          <div className="text-[10px] text-gray-600 mt-2">
+            Weather data provided for informational purposes only. No user data is stored or tracked.
           </div>
 
         </div>
