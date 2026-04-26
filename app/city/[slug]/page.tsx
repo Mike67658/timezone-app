@@ -117,11 +117,25 @@ export default async function CityPage({
         {/* CITY PANEL */}
         <div className="p-6 bg-black/40 border border-cyan-400/30 rounded-xl shadow-[0_0_25px_rgba(34,211,238,0.15)]">
 
-          <div className="text-3xl font-bold text-cyan-200">
-            🌍 {city.name}
+          {/* HEADER ROW */}
+          <div className="flex items-center justify-between gap-4">
+
+            <div className="text-3xl font-bold text-cyan-200">
+              🌍 {city.name}
+            </div>
+
+            {/* 🔥 NEW SEARCH BUTTON */}
+            <a
+              href="/"
+              className="px-4 py-2 rounded-lg bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition shadow-md"
+            >
+              🔍 New Search
+            </a>
+
           </div>
 
-          <div className="text-5xl font-mono text-cyan-300 mt-2">
+          {/* TIME */}
+          <div className="text-5xl font-mono text-cyan-300 mt-4">
             {time}
           </div>
 
@@ -129,6 +143,7 @@ export default async function CityPage({
             {date}
           </div>
 
+          {/* WEATHER */}
           {weather && (
             <div className="mt-3 text-gray-300">
               {Math.round(weather.temperature)}°C / {toF(weather.temperature)}°F •{" "}
@@ -140,11 +155,6 @@ export default async function CityPage({
             LAT-{city.lat.toFixed(2)} LONG-{city.lng.toFixed(2)}
           </div>
 
-        </div>
-
-        {/* MINI TEXT */}
-        <div className="text-sm text-gray-500">
-          Use search on homepage to switch cities
         </div>
 
         {/* FEATURE GRID */}
@@ -181,7 +191,7 @@ export default async function CityPage({
 
         </div>
 
-        {/* 🔥 FOOTER */}
+        {/* FOOTER */}
         <div className="pt-14 text-center space-y-4 text-cyan-200">
 
           <div className="text-lg text-cyan-300">
@@ -199,7 +209,6 @@ export default async function CityPage({
             <div>Updated continuously</div>
           </div>
 
-          {/* NAV TABS ADDED */}
           <div className="flex justify-center gap-6 text-sm text-cyan-300 mt-6">
             <a href="/about" className="hover:text-cyan-100">About</a>
             <a href="/privacy" className="hover:text-cyan-100">Privacy</a>
