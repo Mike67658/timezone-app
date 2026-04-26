@@ -99,25 +99,25 @@ export default async function CityPage({
   return (
     <div className="min-h-screen bg-[#050814] text-white flex">
 
-      {/* LEFT ADS (MATCH HOME) */}
-      <aside className="w-[52px] md:w-[120px] bg-black/30 border-r border-blue-500/10 flex flex-col gap-4 items-center py-4">
+      {/* LEFT ADS */}
+      <aside className="w-[52px] md:w-[120px] bg-black/30 border-r border-cyan-500/20 flex flex-col gap-4 items-center py-4">
         {[1,2,3,4,5,6,7,8,9].map(i => (
           <div
             key={i}
-            className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400"
+            className="w-full h-[180px] border border-dashed border-cyan-400/30 text-[10px] flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]"
           >
             Ad
           </div>
         ))}
       </aside>
 
-      {/* MAIN (MATCH HOME STRUCTURE) */}
+      {/* MAIN */}
       <main className="flex-1 px-4 py-6 space-y-6">
 
-        {/* CITY PANEL (styled like selectedCity block) */}
-        <div className="p-6 bg-black/40 border border-cyan-500/20 rounded-xl">
+        {/* CITY PANEL */}
+        <div className="p-6 bg-black/40 border border-cyan-400/30 rounded-xl shadow-[0_0_25px_rgba(34,211,238,0.15)]">
 
-          <div className="text-3xl font-bold">
+          <div className="text-3xl font-bold text-cyan-200">
             🌍 {city.name}
           </div>
 
@@ -142,12 +142,12 @@ export default async function CityPage({
 
         </div>
 
-        {/* MINI SEARCH (like homepage input) */}
+        {/* MINI TEXT */}
         <div className="text-sm text-gray-500">
           Use search on homepage to switch cities
         </div>
 
-        {/* FEATURED BLOCK (same layout as home) */}
+        {/* FEATURE GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
           {cities.slice(0, 9).map((c, i) => {
@@ -160,9 +160,9 @@ export default async function CityPage({
             return (
               <div
                 key={i}
-                className="p-5 bg-black/30 border border-blue-500/10 rounded-xl"
+                className="p-5 bg-black/30 border border-cyan-500/20 rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.10)]"
               >
-                <div>{c.name}</div>
+                <div className="text-cyan-200">{c.name}</div>
 
                 <div className="text-xl font-mono text-cyan-300">
                   {t}
@@ -181,14 +181,44 @@ export default async function CityPage({
 
         </div>
 
+        {/* 🔥 FOOTER (ADDED ONLY) */}
+        <div className="pt-10 text-center space-y-4 text-cyan-200">
+
+          <div className="text-lg">What time is it in {city.name}?</div>
+
+          <div className="text-2xl font-bold text-cyan-300 mt-4">
+            We have the answer.
+          </div>
+
+          <div className="text-sm text-gray-300 space-y-1 mt-4">
+            <div>Search any city worldwide instantly</div>
+            <div>Accurate timezone + weather data</div>
+            <div>No login required</div>
+            <div>Updated continuously</div>
+          </div>
+
+          <div className="text-cyan-300 mt-6 text-xl font-semibold">
+            TimeByCity
+          </div>
+
+          <div className="text-xs text-gray-500 mt-2">
+            Data: Open-Meteo Weather API • Time zones: IANA standard
+          </div>
+
+          <div className="text-[10px] text-gray-600 mt-4">
+            This site is for informational purposes only. Weather data may vary slightly from local sources.
+          </div>
+
+        </div>
+
       </main>
 
-      {/* RIGHT ADS (MATCH HOME) */}
-      <aside className="w-[52px] md:w-[120px] bg-black/30 border-l border-blue-500/10 flex flex-col gap-4 items-center py-4">
+      {/* RIGHT ADS */}
+      <aside className="w-[52px] md:w-[120px] bg-black/30 border-l border-cyan-500/20 flex flex-col gap-4 items-center py-4">
         {[1,2,3,4,5,6,7,8,9].map(i => (
           <div
             key={i}
-            className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400"
+            className="w-full h-[180px] border border-dashed border-cyan-400/30 text-[10px] flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]"
           >
             Ad
           </div>

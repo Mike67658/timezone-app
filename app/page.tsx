@@ -47,7 +47,6 @@ export default function Home() {
   const fuseRef = useRef<any>(null);
   const debounceRef = useRef<any>(null);
 
-  // LOAD DATA (LOCAL ONLY)
   useEffect(() => {
     const load = async () => {
       const data = await fetch("/cities_search_final.json").then(r => r.json());
@@ -66,7 +65,6 @@ export default function Home() {
     load();
   }, []);
 
-  // WEATHER
   const fetchWeather = async (lat: number, lon: number) => {
     try {
       const res = await fetch(
@@ -77,7 +75,6 @@ export default function Home() {
     } catch {}
   };
 
-  // FEATURED WEATHER
   useEffect(() => {
     const run = async () => {
       const map: any = {};
@@ -100,7 +97,6 @@ export default function Home() {
     return () => clearInterval(i);
   }, []);
 
-  // SEARCH (LOCAL ONLY - NO API)
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
     setSearchQuery(v);
@@ -124,7 +120,6 @@ export default function Home() {
     }, 70);
   };
 
-  // CLICK CITY
   const handleCityClick = (city: any) => {
     setSelectedCity(city);
     setSearchQuery("");
@@ -135,7 +130,6 @@ export default function Home() {
     router.push(`/city/${slug}`);
   };
 
-  // CLOCKS
   useEffect(() => {
     const tick = () => {
       const now = new Date();
@@ -176,36 +170,31 @@ export default function Home() {
     <div className="min-h-screen bg-[#050814] text-white flex">
 
       {/* LEFT ADS */}
-      <aside className="w-[52px] md:w-[120px] bg-black/30 border-r border-blue-500/10 flex flex-col gap-4 items-center py-4">
+      <aside className="w-[52px] md:w-[120px] bg-black/30 border-r border-cyan-500/20 flex flex-col gap-4 items-center py-4">
         {[1,2,3,4,5,6,7,8,9].map(i => (
-          <div key={i} className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400">
+          <div key={i} className="w-full h-[180px] border border-dashed border-cyan-400/30 text-[10px] flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]">
             Ad
           </div>
         ))}
       </aside>
 
-      {/* MAIN */}
-      <main className="flex-1 px-4 py-6 space-y-6">
+      <main className="flex-1 px-4 py-6 space-y-8">
 
         <input
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Search any city..."
-          className="w-full p-5 text-xl rounded-2xl bg-black/40 border border-blue-500/30"
+          className="w-full p-5 text-xl rounded-2xl bg-black/40 border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.15)]"
         />
 
         {results.map((city, i) => (
           <div
             key={i}
             onClick={() => handleCityClick(city)}
-            className="p-5 bg-black/30 border border-blue-500/10 rounded-xl cursor-pointer"
+            className="p-5 bg-black/30 border border-cyan-500/20 rounded-xl cursor-pointer shadow-[0_0_25px_rgba(34,211,238,0.10)]"
           >
-            <div className="text-lg font-semibold">{city.name}</div>
-
-            <div className="text-sm text-gray-400">
-              {city.country} • {city.state}
-            </div>
-
+            <div className="text-lg font-semibold text-cyan-200">{city.name}</div>
+            <div className="text-sm text-gray-400">{city.country} • {city.state}</div>
             <div className="text-xs text-gray-500 mt-1">
               LAT-{city.lat?.toFixed(2)} LONG-{city.lng?.toFixed(2)}
             </div>
@@ -213,9 +202,9 @@ export default function Home() {
         ))}
 
         {selectedCity && (
-          <div className="p-6 bg-black/40 border border-cyan-500/20 rounded-xl">
+          <div className="p-6 bg-black/40 border border-cyan-400/30 rounded-xl shadow-[0_0_30px_rgba(34,211,238,0.15)]">
 
-            <div className="text-3xl font-bold">{selectedCity.name}</div>
+            <div className="text-3xl font-bold text-cyan-200">{selectedCity.name}</div>
 
             <div className="text-5xl font-mono text-cyan-300 mt-2">
               {clocks[selectedCity.timezone]}
@@ -232,6 +221,7 @@ export default function Home() {
               </div>
             )}
 
+            {/* ✅ RESTORED */}
             <div className="text-xs text-gray-500 mt-2">
               LAT-{selectedCity.lat?.toFixed(2)} LONG-{selectedCity.lng?.toFixed(2)}
             </div>
@@ -244,8 +234,9 @@ export default function Home() {
             const w = weatherMap[c.name];
 
             return (
-              <div key={i} className="p-5 bg-black/30 border border-blue-500/10 rounded-xl">
-                <div>{c.emoji} {c.name}</div>
+              <div key={i} className="p-5 bg-black/30 border border-cyan-400/20 rounded-xl shadow-[0_0_25px_rgba(34,211,238,0.10)]">
+
+                <div className="text-cyan-200">{c.emoji} {c.name}</div>
 
                 <div className="text-xl font-mono text-cyan-300">
                   {clocks[c.timezone]}
@@ -261,20 +252,56 @@ export default function Home() {
                   </div>
                 )}
 
+                {/* ✅ RESTORED */}
                 <div className="text-xs text-gray-500 mt-1">
                   LAT-{c.lat.toFixed(2)} LONG-{c.lng.toFixed(2)}
                 </div>
+
               </div>
             );
           })}
         </div>
 
+        {/* FOOTER (UNCHANGED LOGIC) */}
+        <div className="pt-10 text-center space-y-4 text-cyan-200">
+
+          {INITIAL_FEATURED_CITIES.map((c) => (
+            <div key={c.name} className="text-lg">
+              What time is it in {c.name}?
+            </div>
+          ))}
+
+          <div className="text-2xl font-bold text-cyan-300 mt-6">
+            We have the answer.
+          </div>
+
+          <div className="text-sm text-gray-300 space-y-1 mt-4">
+            <div>Search any city worldwide instantly</div>
+            <div>Accurate timezone + weather data</div>
+            <div>No login required</div>
+            <div>Updated continuously</div>
+          </div>
+
+          <div className="text-cyan-300 mt-6 text-xl font-semibold">
+            TimeByCity
+          </div>
+
+          <div className="text-xs text-gray-500 mt-2">
+            Data: Open-Meteo Weather API • Time zones: IANA standard
+          </div>
+
+          <div className="text-[10px] text-gray-600 mt-4">
+            This site is for informational purposes only. Weather data may vary slightly from local sources.
+          </div>
+
+        </div>
+
       </main>
 
       {/* RIGHT ADS */}
-      <aside className="w-[52px] md:w-[120px] bg-black/30 border-l border-blue-500/10 flex flex-col gap-4 items-center py-4">
+      <aside className="w-[52px] md:w-[120px] bg-black/30 border-l border-cyan-500/20 flex flex-col gap-4 items-center py-4">
         {[1,2,3,4,5,6,7,8,9].map(i => (
-          <div key={i} className="w-full h-[180px] border border-dashed border-blue-500/20 text-[10px] flex items-center justify-center text-gray-400">
+          <div key={i} className="w-full h-[180px] border border-dashed border-cyan-400/30 text-[10px] flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]">
             Ad
           </div>
         ))}
