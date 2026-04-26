@@ -1,33 +1,35 @@
+import fs from "fs";
+import path from "path";
+import { generateCitySlug } from "@/lib/slugs";
+
+const DATA_PATH = path.join(process.cwd(), "public/cities_search_final.json");
+
+type City = {
+  name: string;
+  country?: string;
+  state?: string;
+  lat: number;
+  lng: number;
+};
+
+function getCities(): City[] {
+  const raw = fs.readFileSync(DATA_PATH, "utf-8");
+  return JSON.parse(raw);
+}
+
 export default function sitemap() {
-  const now = new Date().toISOString();
+  const cities = getCities();
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  const cityPages = cities.map((city: City) => ({
+    url: `https://timebycity.net/city/${generateCitySlug(city)}`,
+    lastModified: new Date(),
+  }));
 
-  <sitemap>
-    <loc>https://timebycity.net/sitemap/cities-0.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-
-  <sitemap>
-    <loc>https://timebycity.net/sitemap/cities-1.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-
-  <sitemap>
-    <loc>https://timebycity.net/sitemap/cities-2.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-
-  <sitemap>
-    <loc>https://timebycity.net/sitemap/cities-3.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-
-  <sitemap>
-    <loc>https://timebycity.net/sitemap/cities-4.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-
-</sitemapindex>`;
+  return [
+    {
+      url: "https://timebycity.net",
+      lastModified: new Date(),
+    },
+    ...cityPages,
+  ];
 }
