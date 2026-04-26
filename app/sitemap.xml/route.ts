@@ -27,19 +27,18 @@ export async function GET() {
   const cityCount = getCityCount();
   const totalChunks = Math.ceil(cityCount / CHUNK_SIZE);
 
-  const items = Array.from({ length: totalChunks }, (_, i) => `
+  const sitemaps = Array.from(
+    { length: totalChunks },
+    (_, i) => `
 <sitemap>
   <loc>${BASE_URL}/sitemap/cities?page=${i}</loc>
   <lastmod>${LAST_MODIFIED}</lastmod>
-</sitemap>`).join("");
+</sitemap>`
+  ).join("");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<sitemap>
-  <loc>${BASE_URL}/</loc>
-  <lastmod>${LAST_MODIFIED}</lastmod>
-</sitemap>
-${items}
+${sitemaps}
 </sitemapindex>`;
 
   return new Response(xml, {
