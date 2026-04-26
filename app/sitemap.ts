@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { generateCitySlug } from "@/lib/slugs";
 
 const DATA_PATH = path.join(
   process.cwd(),
@@ -40,21 +39,20 @@ function safeParseCities(): City[] {
 export default function sitemap() {
   const cities = safeParseCities();
 
-  const cityPages = cities.map((city) => {
-    const slug = generateCitySlug(city);
+  const CHUNK_SIZE = 40000;
 
-    return {
-      url: `https://timebycity.net/city/${slug}`,
-      // ✅ FIX: stable SEO date (not per-build random)
-      lastModified: new Date("2026-01-01"),
-    };
-  });
+  const chunks = Math.ceil(cities.length / CHUNK_SIZE);
 
   return [
     {
       url: "https://timebycity.net",
       lastModified: new Date("2026-01-01"),
     },
-    ...cityPages,
+
+    // 👇 FIXED: matches your /sitemap/cities/[page] route
+    ...Array.from({ length: chunks }).map((_, i) => ({
+      url: `https://timebycity.net/sitemap/cities/${i}`,
+      lastModified: new Date("2026-01-01"),
+    })),
   ];
 }
