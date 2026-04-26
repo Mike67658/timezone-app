@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <sitemap>
+    <loc>https://timebycity.net/sitemap/cities?page=0</loc>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://timebycity.net/sitemap/cities?page=1</loc>
+  </sitemap>
+
+  <sitemap>
+    <loc>https://timebycity.net/sitemap/cities?page=2</loc>
+  </sitemap>
+
+</sitemapindex>
