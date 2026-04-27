@@ -178,19 +178,26 @@ export default function Home() {
           className="w-full p-5 text-xl rounded-2xl bg-black/40 border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.15)]"
         />
 
-        {results.map((city, i) => (
-          <div
-            key={i}
-            onClick={() => handleCityClick(city)}
-            className="p-3 bg-black/30 border border-cyan-500/20 rounded-lg cursor-pointer shadow-[0_0_18px_rgba(34,211,238,0.08)]"
-          >
-            <div className="text-base font-semibold text-cyan-200">{city.name}</div>
-            <div className="text-xs text-gray-400">{city.country} • {city.state}</div>
-            <div className="text-[11px] text-gray-500 mt-0.5">
-              LAT-{city.lat?.toFixed(2)} LONG-{city.lng?.toFixed(2)}
+        {/* ✅ FIX: removes double spacing between suggestions */}
+        <div className="flex flex-col gap-[2px]">
+          {results.map((city, i) => (
+            <div
+              key={i}
+              onClick={() => handleCityClick(city)}
+              className="px-3 py-[3px] cursor-pointer hover:bg-cyan-500/10 transition"
+            >
+              <div className="flex items-center gap-2 text-sm leading-tight">
+                <span className="text-cyan-200 font-medium">
+                  {city.name}
+                </span>
+
+                <span className="text-gray-400 text-xs">
+                  {city.country} • {city.state}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         {selectedCity && (
           <div className="p-6 bg-black/40 border border-cyan-400/30 rounded-xl shadow-[0_0_30px_rgba(34,211,238,0.15)]">
@@ -211,10 +218,6 @@ export default function Home() {
                 {weatherCodeToText(weather.weathercode)}
               </div>
             )}
-
-            <div className="text-xs text-gray-500 mt-2">
-              LAT-{selectedCity.lat?.toFixed(2)} LONG-{selectedCity.lng?.toFixed(2)}
-            </div>
 
           </div>
         )}

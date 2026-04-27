@@ -97,14 +97,14 @@ export default async function CityPage({
     : "—";
 
   return (
-    <div className="min-h-screen bg-[#050814] text-white">
+    <div className="min-h-screen bg-[#050814] text-white flex">
 
-      <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      {/* MAIN */}
+      <main className="flex-1 px-4 py-6 space-y-6 max-w-6xl mx-auto">
 
         {/* CITY PANEL */}
         <div className="p-6 bg-black/40 border border-cyan-400/30 rounded-xl shadow-[0_0_25px_rgba(34,211,238,0.15)]">
 
-          {/* TOP UTILITY BAR */}
           <div className="flex justify-end mb-4">
             <a
               href="/"
@@ -114,21 +114,19 @@ export default async function CityPage({
             </a>
           </div>
 
-          {/* CITY NAME */}
           <div className="text-3xl font-bold text-cyan-200">
             🌍 {city.name}
           </div>
 
-          {/* TIME */}
           <div className="text-5xl font-mono text-cyan-300 mt-4">
             {time}
           </div>
 
-          <div className="text-sm text-gray-400">
+          {/* FIXED DATE VISIBILITY */}
+          <div className="text-sm text-cyan-200 mt-1">
             {date}
           </div>
 
-          {/* WEATHER */}
           {weather && (
             <div className="mt-3 text-gray-300">
               {Math.round(weather.temperature)}°C / {toF(weather.temperature)}°F •{" "}
@@ -152,6 +150,13 @@ export default async function CityPage({
               minute: "2-digit",
             });
 
+            const d = new Date().toLocaleDateString("en-US", {
+              timeZone: c.timezone,
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            });
+
             return (
               <div
                 key={i}
@@ -163,7 +168,12 @@ export default async function CityPage({
                   {t}
                 </div>
 
-                <div className="text-xs text-gray-400">
+                {/* DATE FIX */}
+                <div className="text-xs text-cyan-200">
+                  {d}
+                </div>
+
+                <div className="text-xs text-gray-400 mt-1">
                   {c.country} {c.state}
                 </div>
 
