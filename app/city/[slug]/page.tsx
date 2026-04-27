@@ -97,27 +97,14 @@ export default async function CityPage({
     : "—";
 
   return (
-    <div className="min-h-screen bg-[#050814] text-white flex">
+    <div className="min-h-screen bg-[#050814] text-white">
 
-      {/* LEFT ADS */}
-      <aside className="w-[52px] md:w-[120px] bg-black/30 border-r border-cyan-500/20 flex flex-col gap-4 items-center py-4">
-        {[1,2,3,4,5,6,7,8,9].map(i => (
-          <div
-            key={i}
-            className="w-full h-[180px] border border-dashed border-cyan-400/30 text-[10px] flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]"
-          >
-            Ad
-          </div>
-        ))}
-      </aside>
-
-      {/* MAIN */}
-      <main className="flex-1 px-4 py-6 space-y-6">
+      <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
 
         {/* CITY PANEL */}
         <div className="p-6 bg-black/40 border border-cyan-400/30 rounded-xl shadow-[0_0_25px_rgba(34,211,238,0.15)]">
 
-          {/* 🔥 TOP UTILITY BAR */}
+          {/* TOP UTILITY BAR */}
           <div className="flex justify-end mb-4">
             <a
               href="/"
@@ -229,18 +216,6 @@ export default async function CityPage({
         </div>
 
       </main>
-
-      {/* RIGHT ADS */}
-      <aside className="w-[52px] md:w-[120px] bg-black/30 border-l border-cyan-500/20 flex flex-col gap-4 items-center py-4">
-        {[1,2,3,4,5,6,7,8,9].map(i => (
-          <div
-            key={i}
-            className="w-full h-[180px] border border-dashed border-cyan-400/30 text-[10px] flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]"
-          >
-            Ad
-          </div>
-        ))}
-      </aside>
 
     </div>
   );

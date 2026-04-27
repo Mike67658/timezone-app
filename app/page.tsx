@@ -167,18 +167,9 @@ export default function Home() {
     });
 
   return (
-    <div className="min-h-screen bg-[#050814] text-white flex">
+    <div className="min-h-screen bg-[#050814] text-white">
 
-      {/* LEFT ADS */}
-      <aside className="w-[52px] md:w-[120px] bg-black/30 border-r border-cyan-500/20 flex flex-col gap-4 items-center py-4">
-        {[1,2,3,4,5,6,7,8,9].map(i => (
-          <div key={i} className="w-full h-[180px] border border-dashed border-cyan-400/30 text-[10px] flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]">
-            Ad
-          </div>
-        ))}
-      </aside>
-
-      <main className="flex-1 px-4 py-6 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 py-6 space-y-8">
 
         <input
           value={searchQuery}
@@ -191,11 +182,11 @@ export default function Home() {
           <div
             key={i}
             onClick={() => handleCityClick(city)}
-            className="p-5 bg-black/30 border border-cyan-500/20 rounded-xl cursor-pointer shadow-[0_0_25px_rgba(34,211,238,0.10)]"
+            className="p-3 bg-black/30 border border-cyan-500/20 rounded-lg cursor-pointer shadow-[0_0_18px_rgba(34,211,238,0.08)]"
           >
-            <div className="text-lg font-semibold text-cyan-200">{city.name}</div>
-            <div className="text-sm text-gray-400">{city.country} • {city.state}</div>
-            <div className="text-xs text-gray-500 mt-1">
+            <div className="text-base font-semibold text-cyan-200">{city.name}</div>
+            <div className="text-xs text-gray-400">{city.country} • {city.state}</div>
+            <div className="text-[11px] text-gray-500 mt-0.5">
               LAT-{city.lat?.toFixed(2)} LONG-{city.lng?.toFixed(2)}
             </div>
           </div>
@@ -260,7 +251,6 @@ export default function Home() {
           })}
         </div>
 
-        {/* FOOTER (WITH RESTORED TRUST + CREDIT SECTION) */}
         <div className="pt-10 text-center border-t border-cyan-500/10 mt-10 space-y-4">
 
           <div className="text-cyan-300 font-semibold text-lg">
@@ -293,7 +283,6 @@ export default function Home() {
             TimeByCity
           </div>
 
-          {/* RESTORED CREDITS */}
           <div className="text-xs text-gray-500 mt-3">
             Data source: Open-Meteo Weather API • Time zones: IANA database
           </div>
@@ -305,15 +294,6 @@ export default function Home() {
         </div>
 
       </main>
-
-      {/* RIGHT ADS */}
-      <aside className="w-[52px] md:w-[120px] bg-black/30 border-l border-cyan-500/20 flex flex-col gap-4 items-center py-4">
-        {[1,2,3,4,5,6,7,8,9].map(i => (
-          <div key={i} className="w-full h-[180px] border border-dashed border-cyan-400/30 text-[10px] flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.15)]">
-            Ad
-          </div>
-        ))}
-      </aside>
 
     </div>
   );
