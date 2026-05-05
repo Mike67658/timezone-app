@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { generateCitySlug } from "@/lib/slugs";
+import citiesData from "../../../public/cities_search_final.json";
 
 type City = {
   name: string;
@@ -12,37 +13,13 @@ type City = {
   population?: number;
 };
 
-function getBaseUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL;
-  }
-
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
-  return "https://www.timebycity.net";
-}
-
-async function getCities(): Promise<City[]> {
-  try {
-    const res = await fetch(`${getBaseUrl()}/cities_search_final.json`, {
-      next: { revalidate: 86400 },
-    });
-
-    if (!res.ok) return [];
-
-    const data = await res.json();
-
-    return data.map((c: any) => ({
-      ...c,
-      lat: Number(c.lat),
-      lng: Number(c.lng),
-      population: Number(c.population || 0),
-    }));
-  } catch {
-    return [];
-  }
+function getCities(): City[] {
+  return (citiesData as any[]).map((c: any) => ({
+    ...c,
+    lat: Number(c.lat),
+    lng: Number(c.lng),
+    population: Number(c.population || 0),
+  }));
 }
 
 function findCityBySlug(slug: string, cities: City[]) {
@@ -65,7 +42,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const cities = await getCities();
+  const cities = getCities();
   const city = findCityBySlug(slug, cities);
 
   if (!city) {
@@ -145,7 +122,7 @@ export default async function CityPage({
 }) {
   const { slug } = await params;
 
-  const cities = await getCities();
+  const cities = getCities();
   const city = findCityBySlug(slug, cities);
 
   if (!city) return notFound();
