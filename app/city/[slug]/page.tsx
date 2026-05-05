@@ -152,15 +152,16 @@ export default async function CityPage({
     : "—";
 
   const nearbyCities = cities
-    .filter(
-      (c) =>
-        generateCitySlug(c) !== currentSlug &&
-        Number.isFinite(c.lat) &&
-        Number.isFinite(c.lng)
-    )
-    .map((c) => ({ ...c, distance: distanceScore(city, c) }))
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, 9);
+  .filter(
+    (c) =>
+      c.country === city.country && // 🔥 LIMIT FIRST
+      generateCitySlug(c) !== currentSlug &&
+      Number.isFinite(c.lat) &&
+      Number.isFinite(c.lng)
+  )
+  .map((c) => ({ ...c, distance: distanceScore(city, c) }))
+  .sort((a, b) => a.distance - b.distance)
+  .slice(0, 9);
 
   const sameTimezoneCities = cities
     .filter(
