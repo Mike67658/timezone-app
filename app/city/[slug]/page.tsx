@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { generateCitySlug } from "@/lib/slugs";
 
 const DATA_PATH = path.join(process.cwd(), "public/cities_search_final.json");
@@ -12,7 +13,7 @@ type City = {
   lat: number;
   lng: number;
   timezone?: string;
-  slug?: string;
+  population?: number;
 };
 
 function getCities(): City[] {
@@ -24,6 +25,7 @@ function getCities(): City[] {
       ...c,
       lat: Number(c.lat),
       lng: Number(c.lng),
+      population: Number(c.population || 0),
     }));
   } catch {
     return [];
@@ -38,7 +40,9 @@ async function getWeather(lat: number, lng: number) {
   try {
     const res = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`,
-      { cache: "no-store" }
+      {
+        next: { revalidate: 1800 }, // refresh about every 30 minutes
+      }
     );
 
     const data = await res.json();
@@ -63,6 +67,18 @@ function toF(c: number) {
   return Math.round((c * 9) / 5 + 32);
 }
 
+function distanceScore(a: City, b: City) {
+  return Math.sqrt(Math.pow(a.lat - b.lat, 2) + Math.pow(a.lng - b.lng, 2));
+}
+
+function AdSlot({ label }: { label: string }) {
+  return (
+    <div className="min-h-[120px] rounded-xl border border-cyan-500/10 bg-black/20 flex items-center justify-center text-xs text-gray-600">
+      Advertisement Placeholder — {label}
+    </div>
+  );
+}
+
 export default async function CityPage({
   params,
 }: {
@@ -76,8 +92,11 @@ export default async function CityPage({
   if (!city) return notFound();
 
   const weather = await getWeather(city.lat, city.lng);
-
   const now = new Date();
+
+  const placeName = `${city.name}${city.state ? `, ${city.state}` : ""}${
+    city.country ? `, ${city.country}` : ""
+  }`;
 
   const time = city.timezone
     ? now.toLocaleTimeString("en-US", {
@@ -90,143 +109,241 @@ export default async function CityPage({
   const date = city.timezone
     ? now.toLocaleDateString("en-US", {
         timeZone: city.timezone,
-        weekday: "short",
-        month: "short",
+        weekday: "long",
+        month: "long",
         day: "numeric",
+        year: "numeric",
       })
     : "—";
 
+  const nearbyCities = cities
+    .filter((c) => generateCitySlug(c) !== slug && c.lat && c.lng)
+    .map((c) => ({ ...c, distance: distanceScore(city, c) }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 9);
+
+  const sameTimezoneCities = cities
+    .filter(
+      (c) =>
+        c.timezone === city.timezone &&
+        generateCitySlug(c) !== slug
+    )
+    .slice(0, 9);
+
   return (
-    <div className="min-h-screen bg-[#050814] text-white flex">
+    <div className="min-h-screen bg-[#050814] text-white">
+      <main className="max-w-6xl mx-auto px-4 py-6 space-y-8">
 
-      {/* MAIN */}
-      <main className="flex-1 px-4 py-6 space-y-6 max-w-6xl mx-auto">
+        <div className="flex justify-end">
+          <Link
+            href="/"
+            className="px-4 py-2 rounded-lg bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition"
+          >
+            🔍 New Search
+          </Link>
+        </div>
 
-        {/* CITY PANEL */}
-        <div className="p-6 bg-black/40 border border-cyan-400/30 rounded-xl shadow-[0_0_25px_rgba(34,211,238,0.15)]">
-
-          <div className="flex justify-end mb-4">
-            <a
-              href="/"
-              className="px-4 py-2 rounded-lg bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition shadow-md"
-            >
-              🔍 New Search
-            </a>
-          </div>
-
-          <div className="text-3xl font-bold text-cyan-200">
-            🌍 {city.name}
-          </div>
+        <section className="p-6 bg-black/40 border border-cyan-400/30 rounded-xl shadow-[0_0_25px_rgba(34,211,238,0.15)]">
+          <h1 className="text-3xl md:text-4xl font-bold text-cyan-200">
+            Current Time in {placeName}
+          </h1>
 
           <div className="text-5xl font-mono text-cyan-300 mt-4">
             {time}
           </div>
 
-          {/* FIXED DATE VISIBILITY */}
-          <div className="text-sm text-cyan-200 mt-1">
+          <div className="text-sm text-cyan-200 mt-2">
             {date}
           </div>
 
-          {weather && (
-            <div className="mt-3 text-gray-300">
-              {Math.round(weather.temperature)}°C / {toF(weather.temperature)}°F •{" "}
+          {weather ? (
+            <div className="mt-4 text-gray-300">
+              Current weather: {Math.round(weather.temperature)}°C /{" "}
+              {toF(weather.temperature)}°F •{" "}
               {weatherCodeToText(weather.weathercode)}
+            </div>
+          ) : (
+            <div className="mt-4 text-gray-400">
+              Weather data is temporarily unavailable.
             </div>
           )}
 
-          <div className="text-xs text-gray-500 mt-2">
-            LAT-{city.lat.toFixed(2)} LONG-{city.lng.toFixed(2)}
+          <div className="text-sm text-gray-400 mt-3">
+            Latitude: {city.lat.toFixed(4)} • Longitude: {city.lng.toFixed(4)}
+          </div>
+        </section>
+
+        <AdSlot label="Top City Page" />
+
+        <section className="p-6 bg-black/30 border border-cyan-400/20 rounded-xl space-y-4 text-gray-300 leading-relaxed">
+          <h2 className="text-2xl font-bold text-cyan-300">
+            Time, Weather, and Coordinates for {city.name}
+          </h2>
+
+          <p>
+            This page shows the current local time in {placeName}, along with
+            the local date, time zone, weather information when available, and
+            the city&apos;s latitude and longitude coordinates.
+          </p>
+
+          <p>
+            {city.name} uses the{" "}
+            <span className="text-cyan-200">{city.timezone || "local"}</span>{" "}
+            time zone. This information can help with planning phone calls,
+            online meetings, travel, deliveries, or checking the local time
+            before contacting someone in another city.
+          </p>
+
+          <p>
+            The latitude and longitude shown for {city.name} are useful for map
+            lookup, weather location matching, travel planning, geographic
+            reference, and time zone identification.
+          </p>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-5 bg-black/30 border border-cyan-400/20 rounded-xl">
+            <h3 className="text-cyan-300 font-semibold">Local Time</h3>
+            <div className="text-2xl font-mono text-cyan-200 mt-2">{time}</div>
           </div>
 
-        </div>
+          <div className="p-5 bg-black/30 border border-cyan-400/20 rounded-xl">
+            <h3 className="text-cyan-300 font-semibold">Time Zone</h3>
+            <div className="text-cyan-200 mt-2">{city.timezone || "—"}</div>
+          </div>
 
-        {/* FEATURE GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-5 bg-black/30 border border-cyan-400/20 rounded-xl">
+            <h3 className="text-cyan-300 font-semibold">Coordinates</h3>
+            <div className="text-cyan-200 mt-2">
+              {city.lat.toFixed(4)}, {city.lng.toFixed(4)}
+            </div>
+          </div>
+        </section>
 
-          {cities.slice(0, 9).map((c, i) => {
-            const t = new Date().toLocaleTimeString("en-US", {
-              timeZone: c.timezone,
-              hour: "numeric",
-              minute: "2-digit",
-            });
+        <AdSlot label="Middle City Page" />
 
-            const d = new Date().toLocaleDateString("en-US", {
-              timeZone: c.timezone,
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-            });
+        <section className="p-6 bg-black/30 border border-cyan-400/20 rounded-xl">
+          <h2 className="text-2xl font-bold text-cyan-300 mb-4">
+            Nearby Cities
+          </h2>
 
-            return (
-              <div
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {nearbyCities.map((c, i) => (
+              <Link
                 key={i}
-                className="p-5 bg-black/30 border border-cyan-500/20 rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.10)]"
+                href={`/city/${generateCitySlug(c)}`}
+                className="p-4 bg-black/30 border border-cyan-500/20 rounded-xl hover:bg-cyan-500/10 transition"
               >
-                <div className="text-cyan-200">{c.name}</div>
-
-                <div className="text-xl font-mono text-cyan-300">
-                  {t}
-                </div>
-
-                {/* DATE FIX */}
-                <div className="text-xs text-cyan-200">
-                  {d}
-                </div>
-
-                <div className="text-xs text-gray-400 mt-1">
+                <div className="text-cyan-200 font-semibold">{c.name}</div>
+                <div className="text-xs text-gray-400">
                   {c.country} {c.state}
                 </div>
-
                 <div className="text-xs text-gray-500 mt-1">
-                  LAT-{c.lat.toFixed(2)} LONG-{c.lng.toFixed(2)}
+                  LAT {c.lat.toFixed(2)} • LNG {c.lng.toFixed(2)}
                 </div>
-              </div>
-            );
-          })}
+              </Link>
+            ))}
+          </div>
+        </section>
 
-        </div>
+        <section className="p-6 bg-black/30 border border-cyan-400/20 rounded-xl">
+          <h2 className="text-2xl font-bold text-cyan-300 mb-4">
+            Other Cities in the Same Time Zone
+          </h2>
 
-        {/* FOOTER */}
-        <div className="pt-14 text-center space-y-4 text-cyan-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {sameTimezoneCities.map((c, i) => (
+              <Link
+                key={i}
+                href={`/city/${generateCitySlug(c)}`}
+                className="p-4 bg-black/30 border border-cyan-500/20 rounded-xl hover:bg-cyan-500/10 transition"
+              >
+                <div className="text-cyan-200 font-semibold">{c.name}</div>
+                <div className="text-xs text-gray-400">
+                  {c.country} {c.state}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {c.timezone}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-          <div className="text-lg text-cyan-300">
-            What time is it in {city.name}?
+        <AdSlot label="Lower City Page" />
+
+        <section className="p-6 bg-black/30 border border-cyan-400/20 rounded-xl space-y-5 text-gray-300">
+          <h2 className="text-2xl font-bold text-cyan-300">
+            Frequently Asked Questions About {city.name}
+          </h2>
+
+          <div>
+            <h3 className="text-cyan-200 font-semibold">
+              What time is it in {city.name} right now?
+            </h3>
+            <p>
+              The current local time in {city.name} is {time}. The date in{" "}
+              {city.name} is {date}.
+            </p>
           </div>
 
-          <div className="text-2xl font-bold text-cyan-200 mt-4">
-            We have the answer.
+          <div>
+            <h3 className="text-cyan-200 font-semibold">
+              What time zone is {city.name} in?
+            </h3>
+            <p>
+              {city.name} is listed in the {city.timezone || "local"} time zone.
+            </p>
           </div>
 
-          <div className="text-sm text-gray-300 space-y-1 mt-4">
-            <div>Search any city worldwide instantly</div>
-            <div>Accurate timezone + weather data</div>
-            <div>No login required</div>
-            <div>Updated continuously</div>
+          <div>
+            <h3 className="text-cyan-200 font-semibold">
+              What are the latitude and longitude of {city.name}?
+            </h3>
+            <p>
+              The coordinates for {city.name} are latitude{" "}
+              {city.lat.toFixed(4)} and longitude {city.lng.toFixed(4)}.
+            </p>
           </div>
 
-          <div className="flex justify-center gap-6 text-sm text-cyan-300 mt-6">
-            <a href="/about" className="hover:text-cyan-100">About</a>
-            <a href="/privacy" className="hover:text-cyan-100">Privacy</a>
-            <a href="/terms" className="hover:text-cyan-100">Terms</a>
-            <a href="/contact" className="hover:text-cyan-100">Contact</a>
+          <div>
+            <h3 className="text-cyan-200 font-semibold">
+              Does this page show weather for {city.name}?
+            </h3>
+            <p>
+              Yes. When available, this page shows current weather information
+              for {city.name}. Weather is refreshed periodically so the page
+              stays useful without making unnecessary API requests.
+            </p>
+          </div>
+        </section>
+
+        <AdSlot label="Bottom City Page" />
+
+        <footer className="pt-10 text-center border-t border-cyan-500/10 space-y-4 text-cyan-200">
+          <div className="flex justify-center gap-6 text-sm text-cyan-300">
+            <Link href="/about">About</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/contact">Contact</Link>
           </div>
 
-          <div className="text-cyan-300 mt-6 text-xl font-semibold">
+          <div className="text-cyan-300 text-xl font-semibold">
             TimeByCity
           </div>
 
-          <div className="text-xs text-gray-500 mt-2">
-            Data: Open-Meteo Weather API • Time zones: IANA standard
+          <div className="text-xs text-gray-500">
+            Data: Open-Meteo Weather API • Time zones: IANA standard •
+            Coordinates include latitude and longitude.
           </div>
 
-          <div className="text-[10px] text-gray-600 mt-4">
-            This site is for informational purposes only. Weather data may vary slightly from local sources.
+          <div className="text-[10px] text-gray-600">
+            This site is for informational purposes only. Weather data may vary
+            slightly from local sources.
           </div>
-
-        </div>
+        </footer>
 
       </main>
-
     </div>
   );
 }
