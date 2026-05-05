@@ -45,57 +45,12 @@ async function getCities(): Promise<City[]> {
   }
 }
 
-function cleanSlugPart(value?: string) {
-  return String(value || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function normalizeSlug(value: string) {
-  return cleanSlugPart(value);
-}
-
-function getCitySlugCandidates(city: City) {
-  const name = cleanSlugPart(city.name);
-  const state = cleanSlugPart(city.state);
-  const country = cleanSlugPart(city.country);
-
-  return [
-    normalizeSlug(generateCitySlug(city)),
-    [name, state, country].filter(Boolean).join("-"),
-    [name, country, state].filter(Boolean).join("-"),
-    [name, state].filter(Boolean).join("-"),
-    [name, country].filter(Boolean).join("-"),
-    name,
-  ].filter(Boolean);
-}
-
 function findCityBySlug(slug: string, cities: City[]) {
-  const wanted = normalizeSlug(slug);
+  const wanted = slug.toLowerCase();
 
-  let city = cities.find((c) => getCitySlugCandidates(c).includes(wanted));
-
-  if (city) return city;
-
-  city = cities.find((c) => {
-    const name = cleanSlugPart(c.name);
-    const state = cleanSlugPart(c.state);
-    const country = cleanSlugPart(c.country);
-
-    if (!name || !wanted.startsWith(name)) return false;
-
-    const stateMatches = state ? wanted.includes(`-${state}`) : true;
-    const countryMatches = country
-      ? wanted.endsWith(`-${country}`) || wanted.includes(`-${country}-`)
-      : true;
-
-    return stateMatches && countryMatches;
-  });
-
-  return city || null;
+  return (
+    cities.find((c) => generateCitySlug(c).toLowerCase() === wanted) || null
+  );
 }
 
 function getPlaceName(city: City) {
@@ -122,18 +77,18 @@ export async function generateMetadata({
   }
 
   const placeName = getPlaceName(city);
-  const canonicalSlug = normalizeSlug(generateCitySlug(city));
+  const canonicalSlug = generateCitySlug(city);
 
   return {
     title: `Current Time in ${placeName} | TimeByCity`,
     description: `Check the current local time in ${placeName}, including date, time zone, weather, latitude, and longitude coordinates.`,
     alternates: {
-      canonical: `https://timebycity.net/city/${canonicalSlug}`,
+      canonical: `https://www.timebycity.net/city/${canonicalSlug}`,
     },
     openGraph: {
       title: `Current Time in ${placeName} | TimeByCity`,
       description: `View the current time, date, time zone, weather, latitude, and longitude for ${placeName}.`,
-      url: `https://timebycity.net/city/${canonicalSlug}`,
+      url: `https://www.timebycity.net/city/${canonicalSlug}`,
       siteName: "TimeByCity",
       type: "website",
     },
@@ -199,7 +154,7 @@ export default async function CityPage({
   const now = new Date();
 
   const placeName = getPlaceName(city);
-  const currentSlug = normalizeSlug(generateCitySlug(city));
+  const currentSlug = generateCitySlug(city);
 
   const time = city.timezone
     ? now.toLocaleTimeString("en-US", {
@@ -222,7 +177,7 @@ export default async function CityPage({
   const nearbyCities = cities
     .filter(
       (c) =>
-        normalizeSlug(generateCitySlug(c)) !== currentSlug &&
+        generateCitySlug(c) !== currentSlug &&
         Number.isFinite(c.lat) &&
         Number.isFinite(c.lng)
     )
@@ -234,7 +189,7 @@ export default async function CityPage({
     .filter(
       (c) =>
         c.timezone === city.timezone &&
-        normalizeSlug(generateCitySlug(c)) !== currentSlug
+        generateCitySlug(c) !== currentSlug
     )
     .slice(0, 9);
 
