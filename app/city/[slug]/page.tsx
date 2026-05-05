@@ -36,12 +36,52 @@ function findCityBySlug(slug: string, cities: City[]) {
   return cities.find((c) => generateCitySlug(c) === slug);
 }
 
+function getPlaceName(city: City) {
+  return `${city.name}${city.state ? `, ${city.state}` : ""}${
+    city.country ? `, ${city.country}` : ""
+  }`;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const cities = getCities();
+  const city = findCityBySlug(slug, cities);
+
+  if (!city) {
+    return {
+      title: "City Not Found | TimeByCity",
+      description: "Search cities worldwide by current local time, date, time zone, weather, latitude, and longitude.",
+    };
+  }
+
+  const placeName = getPlaceName(city);
+
+  return {
+    title: `Current Time in ${placeName} | TimeByCity`,
+    description: `Check the current local time in ${placeName}, including date, time zone, weather, latitude, and longitude coordinates.`,
+    alternates: {
+      canonical: `https://timebycity.net/city/${slug}`,
+    },
+    openGraph: {
+      title: `Current Time in ${placeName} | TimeByCity`,
+      description: `View the current time, date, time zone, weather, latitude, and longitude for ${placeName}.`,
+      url: `https://timebycity.net/city/${slug}`,
+      siteName: "TimeByCity",
+      type: "website",
+    },
+  };
+}
+
 async function getWeather(lat: number, lng: number) {
   try {
     const res = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`,
       {
-        next: { revalidate: 1800 }, // refresh about every 30 minutes
+        next: { revalidate: 1800 },
       }
     );
 
@@ -94,9 +134,7 @@ export default async function CityPage({
   const weather = await getWeather(city.lat, city.lng);
   const now = new Date();
 
-  const placeName = `${city.name}${city.state ? `, ${city.state}` : ""}${
-    city.country ? `, ${city.country}` : ""
-  }`;
+  const placeName = getPlaceName(city);
 
   const time = city.timezone
     ? now.toLocaleTimeString("en-US", {
