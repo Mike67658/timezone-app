@@ -9,7 +9,7 @@ import { generateCitySlug } from "@/lib/slugs";
 const INITIAL_FEATURED_CITIES = [
   { name: "Manila", timezone: "Asia/Manila", emoji: "🇵🇭", lat: 14.5995, lng: 120.9842, country: "PH", state: "" },
   { name: "Tokyo", timezone: "Asia/Tokyo", emoji: "🇯🇵", lat: 35.6762, lng: 139.6503, country: "JP", state: "" },
-  { name: "New York", timezone: "America/New_York", emoji: "🇺🇸", lat: 40.7128, lng: -74.006, country: "US", state: "NY" },
+  { name: "New York City", timezone: "America/New_York", emoji: "🇺🇸", lat: 40.7128, lng: -74.006, country: "US", state: "NY" },
   { name: "London", timezone: "Europe/London", emoji: "🇬🇧", lat: 51.5072, lng: -0.1276, country: "GB", state: "" },
   { name: "Dubai", timezone: "Asia/Dubai", emoji: "🇦🇪", lat: 25.2048, lng: 55.2708, country: "AE", state: "" },
   { name: "Los Angeles", timezone: "America/Los_Angeles", emoji: "🇺🇸", lat: 34.0522, lng: -118.2437, country: "US", state: "CA" },
