@@ -1,10 +1,6 @@
-import fs from "fs";
-import path from "path";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { generateCitySlug } from "@/lib/slugs";
-
-const DATA_PATH = path.join(process.cwd(), "public/cities_search_final.json");
 
 type City = {
   name: string;
@@ -16,10 +12,27 @@ type City = {
   population?: number;
 };
 
-function getCities(): City[] {
+function getBaseUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return "https://timebycity.net";
+}
+
+async function getCities(): Promise<City[]> {
   try {
-    const raw = fs.readFileSync(DATA_PATH, "utf-8");
-    const data = JSON.parse(raw);
+    const res = await fetch(`${getBaseUrl()}/cities_search_final.json`, {
+      next: { revalidate: 86400 },
+    });
+
+    if (!res.ok) return [];
+
+    const data = await res.json();
 
     return data.map((c: any) => ({
       ...c,
@@ -63,9 +76,7 @@ function getCitySlugCandidates(city: City) {
 function findCityBySlug(slug: string, cities: City[]) {
   const wanted = normalizeSlug(slug);
 
-  let city = cities.find((c) =>
-    getCitySlugCandidates(c).includes(wanted)
-  );
+  let city = cities.find((c) => getCitySlugCandidates(c).includes(wanted));
 
   if (city) return city;
 
@@ -77,7 +88,9 @@ function findCityBySlug(slug: string, cities: City[]) {
     if (!name || !wanted.startsWith(name)) return false;
 
     const stateMatches = state ? wanted.includes(`-${state}`) : true;
-    const countryMatches = country ? wanted.endsWith(`-${country}`) || wanted.includes(`-${country}-`) : true;
+    const countryMatches = country
+      ? wanted.endsWith(`-${country}`) || wanted.includes(`-${country}-`)
+      : true;
 
     return stateMatches && countryMatches;
   });
@@ -97,7 +110,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const cities = getCities();
+  const cities = await getCities();
   const city = findCityBySlug(slug, cities);
 
   if (!city) {
@@ -109,17 +122,18 @@ export async function generateMetadata({
   }
 
   const placeName = getPlaceName(city);
+  const canonicalSlug = normalizeSlug(generateCitySlug(city));
 
   return {
     title: `Current Time in ${placeName} | TimeByCity`,
     description: `Check the current local time in ${placeName}, including date, time zone, weather, latitude, and longitude coordinates.`,
     alternates: {
-      canonical: `https://timebycity.net/city/${normalizeSlug(slug)}`,
+      canonical: `https://timebycity.net/city/${canonicalSlug}`,
     },
     openGraph: {
       title: `Current Time in ${placeName} | TimeByCity`,
       description: `View the current time, date, time zone, weather, latitude, and longitude for ${placeName}.`,
-      url: `https://timebycity.net/city/${normalizeSlug(slug)}`,
+      url: `https://timebycity.net/city/${canonicalSlug}`,
       siteName: "TimeByCity",
       type: "website",
     },
@@ -176,7 +190,7 @@ export default async function CityPage({
 }) {
   const { slug } = await params;
 
-  const cities = getCities();
+  const cities = await getCities();
   const city = findCityBySlug(slug, cities);
 
   if (!city) return notFound();
@@ -185,6 +199,7 @@ export default async function CityPage({
   const now = new Date();
 
   const placeName = getPlaceName(city);
+  const currentSlug = normalizeSlug(generateCitySlug(city));
 
   const time = city.timezone
     ? now.toLocaleTimeString("en-US", {
@@ -205,7 +220,12 @@ export default async function CityPage({
     : "—";
 
   const nearbyCities = cities
-    .filter((c) => normalizeSlug(generateCitySlug(c)) !== normalizeSlug(slug) && c.lat && c.lng)
+    .filter(
+      (c) =>
+        normalizeSlug(generateCitySlug(c)) !== currentSlug &&
+        Number.isFinite(c.lat) &&
+        Number.isFinite(c.lng)
+    )
     .map((c) => ({ ...c, distance: distanceScore(city, c) }))
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 9);
@@ -214,7 +234,7 @@ export default async function CityPage({
     .filter(
       (c) =>
         c.timezone === city.timezone &&
-        normalizeSlug(generateCitySlug(c)) !== normalizeSlug(slug)
+        normalizeSlug(generateCitySlug(c)) !== currentSlug
     )
     .slice(0, 9);
 
@@ -235,13 +255,9 @@ export default async function CityPage({
             Current Time in {placeName}
           </h1>
 
-          <div className="text-5xl font-mono text-cyan-300 mt-4">
-            {time}
-          </div>
+          <div className="text-5xl font-mono text-cyan-300 mt-4">{time}</div>
 
-          <div className="text-sm text-cyan-200 mt-2">
-            {date}
-          </div>
+          <div className="text-sm text-cyan-200 mt-2">{date}</div>
 
           {weather ? (
             <div className="mt-4 text-gray-300">
@@ -349,9 +365,7 @@ export default async function CityPage({
                 <div className="text-xs text-gray-400">
                   {c.country} {c.state}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {c.timezone}
-                </div>
+                <div className="text-xs text-gray-500 mt-1">{c.timezone}</div>
               </Link>
             ))}
           </div>
@@ -415,9 +429,7 @@ export default async function CityPage({
             <Link href="/contact">Contact</Link>
           </div>
 
-          <div className="text-cyan-300 text-xl font-semibold">
-            TimeByCity
-          </div>
+          <div className="text-cyan-300 text-xl font-semibold">TimeByCity</div>
 
           <div className="text-xs text-gray-500">
             Data: Open-Meteo Weather API • Time zones: IANA standard •
