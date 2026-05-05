@@ -21,7 +21,7 @@ function getBaseUrl() {
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  return "https://timebycity.net";
+  return "https://www.timebycity.net";
 }
 
 async function getCities(): Promise<City[]> {
